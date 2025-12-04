@@ -1,317 +1,87 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
+<h2 class="mb-4">Painel da Oficina</h2>
 
-{% block content %}
-<div class="container-fluid mt-4">
-    <h2 class="mb-4">
-        <i class="fas fa-toolbox"></i> Painel da Oficina
-    </h2>
-
-    <div class="row">
-        <!-- Problemas em Aberto -->
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">
-                        <i class="fas fa-inbox"></i> Problemas Disponíveis
-                        <span class="badge bg-danger ms-2">{{ problemas_abertos|length }}</span>
-                    </h5>
-                </div>
-
-                <div class="card-body">
-                    {% if problemas_abertos %}
-                        <div class="list-group list-group-flush">
-                            {% for problema in problemas_abertos %}
-                                <a href="{% url 'detalhe_problema' problema.id %}" class="list-group-item list-group-item-action p-3 mb-2 border-start border-4 border-warning rounded">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1">
-                                                <i class="fas fa-car"></i> {{ problema.modelo_carro }}
-                                            </h6>
-                                            <p class="mb-1 text-muted">
-                                                <strong>{{ problema.titulo }}</strong>
-                                            </p>
-                                            <small class="text-muted d-block mb-2">
-                                                {{ problema.descricao|truncatewords:15 }}
-                                            </small>
-                                            <div class="d-flex gap-2 flex-wrap">
-                                                <small class="badge bg-light text-dark">
-                                                    <i class="fas fa-user"></i> {{ problema.cliente.first_name }}
-                                                </small>
-                                                <small class="badge bg-light text-dark">
-                                                    <i class="fas fa-calendar"></i> {{ problema.data_criacao|date:"d/m" }}
-                                                </small>
-                                                {% if problema.total_interessadas > 0 %}
-                                                    <small class="badge bg-info">
-                                                        <i class="fas fa-users"></i> {{ problema.total_interessadas }}
-                                                    </small>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="ms-3">
-                                            <i class="fas fa-arrow-right text-warning fa-lg"></i>
-                                        </div>
-                                    </div>
-                                </a>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info" role="alert">
-                            <i class="fas fa-info-circle"></i> Não há novos chamados no momento.
-                            <br>
-                            <small>Verifique novamente em breve!</small>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
+<div class="row">
+  <div class="col-md-6">
+    <h4 class="text-primary">Disponíveis para Pegar</h4>
+    {% for problema in problemas_abertos %}
+    <div class="card mb-3 shadow-sm">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-{% if problema.imagem %}8{% else %}12{% endif %}">
+            <h5 class="card-title">
+              {{ problema.modelo_carro }} - {{ problema.titulo }}
+            </h5>
+            <p class="card-text">{{ problema.descricao }}</p>
+            <p class="text-muted">
+              <small
+                >Cliente: {{ problema.cliente.username }} | {{
+                problema.data_criacao|date:"d/m/Y H:i" }}</small
+              >
+            </p>
+            <a
+              href="{% url 'pegar_servico' problema.pk %}"
+              class="btn btn-outline-primary btn-sm"
+              >Pegar Serviço</a
+            >
+          </div>
+          {% if problema.imagem %}
+          <div class="col-md-4">
+            <img
+              src="{{ problema.imagem.url }}"
+              alt="Imagem do problema"
+              class="img-fluid rounded"
+            />
+          </div>
+          {% endif %}
         </div>
-
-        <!-- Problemas Selecionados (com Interesse) -->
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-bookmark"></i> Meus Interesses
-                        <span class="badge bg-light text-primary ms-2">{{ problemas_selecionados|length }}</span>
-                    </h5>
-                </div>
-
-                <div class="card-body">
-                    {% if problemas_selecionados %}
-                        <div class="list-group list-group-flush">
-                            {% for problema in problemas_selecionados %}
-                                <a href="{% url 'detalhe_problema' problema.id %}" class="list-group-item list-group-item-action p-3 mb-2 border-start border-4 border-primary rounded">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1">
-                                                <i class="fas fa-heart"></i> {{ problema.modelo_carro }}
-                                            </h6>
-                                            <p class="mb-1 text-muted">
-                                                <strong>{{ problema.titulo }}</strong>
-                                            </p>
-                                            <small class="text-muted d-block mb-2">
-                                                {{ problema.descricao|truncatewords:15 }}
-                                            </small>
-                                            <div class="d-flex gap-2 flex-wrap">
-                                                <small class="badge bg-light text-dark">
-                                                    <i class="fas fa-user"></i> {{ problema.cliente.first_name }}
-                                                </small>
-                                                <small class="badge bg-light text-dark">
-                                                    <i class="fas fa-calendar"></i> {{ problema.data_criacao|date:"d/m" }}
-                                                </small>
-                                                <small class="badge bg-light text-dark">
-                                                    <i class="fas fa-users"></i> {{ problema.total_interessadas }}
-                                                </small>
-                                            </div>
-                                        </div>
-                                        <div class="ms-3">
-                                            <i class="fas fa-arrow-right text-primary fa-lg"></i>
-                                        </div>
-                                    </div>
-                                </a>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info" role="alert">
-                            <i class="fas fa-info-circle"></i> Você ainda não manifestou interesse em nenhum problema.
-                            <br>
-                            <small>Procure nos "Problemas Disponíveis"!</small>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Meus Serviços em Andamento -->
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-check-circle"></i> Meus Serviços
-                        <span class="badge bg-light text-success ms-2">{{ meus_servicos|length }}</span>
-                    </h5>
-                </div>
-
-                <div class="card-body">
-                    {% if meus_servicos %}
-                        <div class="list-group list-group-flush">
-                            {% for servico in meus_servicos %}
-                                <a href="{% url 'detalhe_problema' servico.id %}" class="list-group-item list-group-item-action p-3 mb-2 border-start border-4 border-success rounded">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1">
-                                                <i class="fas fa-wrench"></i> {{ servico.modelo_carro }}
-                                            </h6>
-                                            <p class="mb-1 text-muted">
-                                                <strong>{{ servico.titulo }}</strong>
-                                            </p>
-                                            <small class="text-muted d-block mb-2">
-                                                {{ servico.descricao|truncatewords:15 }}
-                                            </small>
-                                            <div class="d-flex gap-2 flex-wrap align-items-center">
-                                                <span class="badge bg-info">
-                                                    <i class="fas fa-hourglass-half"></i> Em Andamento
-                                                </span>
-                                                <small class="text-muted">
-                                                    <i class="fas fa-user"></i> {{ servico.cliente.first_name }}
-                                                </small>
-                                            </div>
-                                        </div>
-                                        <div class="ms-3">
-                                            {% if servico.status != 'CONCLUIDO' %}
-                                                <form method="post" action="{% url 'concluir_servico' servico.pk %}" style="display:inline;">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-sm btn-success" title="Marcar como concluído">
-                                                        <i class="fas fa-check"></i>
-                                                    </button>
-                                                </form>
-                                            {% else %}
-                                                <span class="badge bg-success">✓</span>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </a>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info" role="alert">
-                            <i class="fas fa-inbox"></i> Você não tem serviços em andamento.
-                            <br>
-                            <small>Manifeste interesse e aguarde a aceitação!</small>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
-</div>
+    {% empty %}
+    <p>Não há novos chamados no momento.</p>
+    {% endfor %}
+  </div>
 
-<style>
-    .card {
-        transition: box-shadow 0.3s ease;
-    }
-
-    .card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-    }
-
-    .list-group-item {
-        transition: all 0.2s ease;
-        text-decoration: none;
-        color: inherit;
-        border: 1px solid #dee2e6;
-    }
-
-    .list-group-item:hover {
-        background-color: #f8f9fa !important;
-        border-color: #dee2e6;
-        transform: translateX(4px);
-    }
-
-    .badge {
-        padding: 0.35rem 0.65rem;
-        font-size: 0.75rem;
-    }
-
-    .border-start {
-        border-left-width: 4px !important;
-    }
-
-    /* Responsividade para 3 colunas */
-    @media (max-width: 1200px) {
-        .col-lg-4 {
-            flex: 0 0 50%;
-            max-width: 50%;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .col-lg-4 {
-            flex: 0 0 100%;
-            max-width: 100%;
-        }
-    }
-</style>
-{% endblock %}
-                            {% for servico in meus_servicos %}
-                                <a href="{% url 'detalhe_problema' servico.id %}" class="list-group-item list-group-item-action p-3 mb-2 border-start border-4 border-success rounded">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1">
-                                                <i class="fas fa-wrench"></i> {{ servico.modelo_carro }}
-                                            </h6>
-                                            <p class="mb-1 text-muted">
-                                                <strong>{{ servico.titulo }}</strong>
-                                            </p>
-                                            <small class="text-muted d-block mb-2">
-                                                {{ servico.descricao|truncatewords:15 }}
-                                            </small>
-                                            <div class="d-flex gap-2 flex-wrap align-items-center">
-                                                <span class="badge bg-info">
-                                                    <i class="fas fa-hourglass-half"></i> Em Andamento
-                                                </span>
-                                                <small class="text-muted">
-                                                    <i class="fas fa-user"></i> {{ servico.cliente.first_name }}
-                                                </small>
-                                            </div>
-                                        </div>
-                                        <div class="ms-3">
-                                            {% if servico.status != 'CONCLUIDO' %}
-                                                <form method="post" action="{% url 'concluir_servico' servico.pk %}" style="display:inline;">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-sm btn-success" title="Marcar como concluído">
-                                                        <i class="fas fa-check"></i>
-                                                    </button>
-                                                </form>
-                                            {% else %}
-                                                <span class="badge bg-success">✓ Concluído</span>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </a>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info" role="alert">
-                            <i class="fas fa-inbox"></i> Você não tem serviços em andamento.
-                            <br>
-                            <small>Procure por um problema interessante nos "Problemas Disponíveis"!</small>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
+  <div class="col-md-6">
+    <h4 class="text-success">Meus Serviços em Andamento</h4>
+    {% for servico in meus_servicos %}
+    <div class="card mb-3 border-success">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-{% if servico.imagem %}8{% else %}12{% endif %}">
+            <h5 class="card-title">
+              {{ servico.modelo_carro }} - {{ servico.titulo }}
+            </h5>
+            <p class="card-text">{{ servico.descricao }}</p>
+            <p class="text-muted">
+              <small>Cliente: {{ servico.cliente.username }}</small>
+            </p>
+            <p>
+              Status atual: <strong>{{ servico.get_status_display }}</strong>
+            </p>
+            {% if servico.status != 'CONCLUIDO' %}
+            <a
+              href="{% url 'concluir_servico' servico.pk %}"
+              class="btn btn-success btn-sm"
+              >Marcar como Concluído</a
+            >
+            {% endif %}
+          </div>
+          {% if servico.imagem %}
+          <div class="col-md-4">
+            <img
+              src="{{ servico.imagem.url }}"
+              alt="Imagem do problema"
+              class="img-fluid rounded"
+            />
+          </div>
+          {% endif %}
         </div>
+      </div>
     </div>
+    {% empty %}
+    <p>Você não tem serviços ativos.</p>
+    {% endfor %}
+  </div>
 </div>
-
-<style>
-    .card {
-        transition: box-shadow 0.3s ease;
-    }
-
-    .card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-    }
-
-    .list-group-item {
-        transition: all 0.2s ease;
-        text-decoration: none;
-        color: inherit;
-        border: 1px solid #dee2e6;
-    }
-
-    .list-group-item:hover {
-        background-color: #f8f9fa !important;
-        border-color: #dee2e6;
-        transform: translateX(4px);
-    }
-
-    .badge {
-        padding: 0.35rem 0.65rem;
-        font-size: 0.75rem;
-    }
-
-    .border-start {
-        border-left-width: 4px !important;
-    }
-</style>
 {% endblock %}

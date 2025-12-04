@@ -32,39 +32,9 @@ class Problema(models.Model):
     titulo = models.CharField(max_length=200)
     modelo_carro = models.CharField(max_length=100)
     descricao = models.TextField()
-    imagem = models.ImageField(upload_to='problemas/', null=True, blank=True, help_text='Foto do problema')
+    imagem = models.ImageField(upload_to='problemas/', null=True, blank=True)
     data_criacao = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ABERTO')
 
     def __str__(self):
         return f"{self.modelo_carro} - {self.titulo}"
-
-    def oficinas_interessadas(self):
-        """Retorna todas as oficinas interessadas neste problema"""
-        return self.interesses.filter(status='INTERESSADA').values_list('oficina', flat=True)
-    
-    def total_interessadas(self):
-        """Retorna o total de oficinas interessadas"""
-        return self.interesses.filter(status='INTERESSADA').count()
-
-
-class Interesse(models.Model):
-    STATUS_CHOICES = (
-        ('INTERESSADA', 'Interessada'),
-        ('REJEITADA', 'Rejeitada'),
-        ('CANCELADA', 'Cancelada'),
-    )
-    
-    problema = models.ForeignKey(Problema, on_delete=models.CASCADE, related_name='interesses')
-    oficina = models.ForeignKey(User, on_delete=models.CASCADE, related_name='interesses_manifesto')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='INTERESSADA')
-    mensagem = models.TextField(blank=True, null=True, help_text='Mensagem da oficina sobre o serviço')
-    data_interesse = models.DateTimeField(auto_now_add=True)
-    data_atualizacao = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = ('problema', 'oficina')
-        ordering = ['-data_interesse']
-
-    def __str__(self):
-        return f"{self.oficina.username} interessada em {self.problema.titulo}"

@@ -2,23 +2,9 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import User, Problema, PerfilOficina, Especialidade
 
-class UserSignUpForm(UserCreationForm):
-    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    first_name = forms.CharField(max_length=150, required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome (opcional)'}))
-    
+class ClienteSignUpForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ('username', 'email', 'first_name', 'password1', 'password2')
-        widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome de usuário'}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['password1'].widget = forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Senha'})
-        self.fields['password2'].widget = forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirme a senha'})
-
-class ClienteSignUpForm(UserSignUpForm):
     
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -27,24 +13,25 @@ class ClienteSignUpForm(UserSignUpForm):
             user.save()
         return user
 
-class OficinaSignUpForm(UserSignUpForm):
-    nome_oficina = forms.CharField(max_length=200, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome da oficina'}))
-    endereco = forms.CharField(max_length=255, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Endereço'}))
+class OficinaSignUpForm(UserCreationForm):
+    nome_oficina = forms.CharField(max_length=200, label='Nome da Oficina')
+    endereco = forms.CharField(max_length=255, label='Endereço')
     especialidades = forms.ModelMultipleChoiceField(
         queryset=Especialidade.objects.all(),
-        widget=forms.CheckboxSelectMultiple(),
-        required=True
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label='Especialidades'
     )
     
-    class Meta(UserSignUpForm.Meta):
-        fields = ('username', 'email', 'first_name', 'password1', 'password2', 'nome_oficina', 'endereco', 'especialidades')
+    class Meta(UserCreationForm.Meta):
+        model = User
     
     def save(self, commit=True):
-        user = super(UserSignUpForm, self).save(commit=False)
+        user = super().save(commit=False)
         user.is_oficina = True
         if commit:
             user.save()
-            # Criar perfil de oficina
+            # Criar perfil da oficina
             perfil = PerfilOficina.objects.create(
                 usuario=user,
                 nome_oficina=self.cleaned_data['nome_oficina'],
@@ -58,38 +45,14 @@ class ProblemaForm(forms.ModelForm):
         model = Problema
         fields = ['titulo', 'modelo_carro', 'descricao', 'imagem']
         widgets = {
-            'titulo': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Título do problema'
-            }),
-            'modelo_carro': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ex: Fiat Uno 2015'
-            }),
-            'descricao': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'placeholder': 'Descreva o problema com detalhes'
-            }),
-            'imagem': forms.FileInput(attrs={
-                'class': 'form-control',
-                'accept': 'image/*',
-                'data-toggle': 'tooltip',
-                'title': 'Selecione uma foto do problema'
-            }),
+            'titulo': forms.TextInput(attrs={'class': 'form-control'}),
+            'modelo_carro': forms.TextInput(attrs={'class': 'form-control'}),
+            'descricao': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'imagem': forms.FileInput(attrs={'class': 'form-control'}),
         }
-    
-    def clean_imagem(self):
-        imagem = self.cleaned_data.get('imagem')
-        if imagem:
-            # Verificar tamanho (máximo 5MB)
-            if imagem.size > 5 * 1024 * 1024:
-                raise forms.ValidationError('A imagem não pode ser maior que 5MB')
-            
-            # Verificar tipo de arquivo
-            if not imagem.content_type.startswith('image/'):
-                raise forms.ValidationError('O arquivo deve ser uma imagem')
-        return imagem
+        labels = {
+            'imagem': 'Foto do Problema (opcional)',
+        }
 
 class OficinaPerfilForm(forms.ModelForm):
     class Meta:

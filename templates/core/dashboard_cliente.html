@@ -1,269 +1,57 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <div class="row">
-    <!-- Formulário de Cadastro de Problema -->
-    <div class="col-md-5 mb-4">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-plus-circle"></i> Novo Problema
-                </h5>
-            </div>
-            <div class="card-body">
-                <form method="post" enctype="multipart/form-data" novalidate>
-                    {% csrf_token %}
-                    
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {% for error in form.non_field_errors %}
-                                <div>{{ error }}</div>
-                            {% endfor %}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endif %}
-                    
-                    <!-- Campo: Título -->
-                    <div class="mb-3">
-                        <label for="{{ form.titulo.id_for_label }}" class="form-label fw-bold">
-                            <i class="fas fa-heading"></i> Título
-                        </label>
-                        {{ form.titulo }}
-                        {% if form.titulo.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form.titulo.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Campo: Modelo do Carro -->
-                    <div class="mb-3">
-                        <label for="{{ form.modelo_carro.id_for_label }}" class="form-label fw-bold">
-                            <i class="fas fa-car"></i> Modelo do Carro
-                        </label>
-                        {{ form.modelo_carro }}
-                        {% if form.modelo_carro.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form.modelo_carro.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Campo: Descrição -->
-                    <div class="mb-3">
-                        <label for="{{ form.descricao.id_for_label }}" class="form-label fw-bold">
-                            <i class="fas fa-align-left"></i> Descrição
-                        </label>
-                        {{ form.descricao }}
-                        {% if form.descricao.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form.descricao.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Campo: Imagem -->
-                    <div class="mb-3">
-                        <label for="{{ form.imagem.id_for_label }}" class="form-label fw-bold">
-                            <i class="fas fa-image"></i> Foto do Problema
-                        </label>
-                        <div class="input-group">
-                            {{ form.imagem }}
-                            <span class="input-group-text">
-                                <i class="fas fa-camera"></i>
-                            </span>
-                        </div>
-                        <small class="form-text text-muted d-block mt-2">
-                            <i class="fas fa-info-circle"></i> 
-                            Máximo 5MB. Aceita: JPG, PNG, GIF
-                        </small>
-                        {% if form.imagem.errors %}
-                            <div class="text-danger small mt-2">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {% for error in form.imagem.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Botão Submit -->
-                    <button type="submit" class="btn btn-success w-100">
-                        <i class="fas fa-paper-plane"></i> Registrar Problema
-                    </button>
-                </form>
-            </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">Novo Problema</div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %} {{ form.as_p }}
+          <button type="submit" class="btn btn-primary w-100">Registrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <h3 class="mb-3">Meus Chamados</h3>
+    {% for problema in problemas %}
+    <div
+      class="card mb-3 border-start border-4 {% if problema.status == 'CONCLUIDO' %}border-success{% else %}border-warning{% endif %}"
+    >
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-{% if problema.imagem %}8{% else %}12{% endif %}">
+            <h5 class="card-title">
+              {{ problema.modelo_carro }} - {{ problema.titulo }}
+            </h5>
+            <p class="card-text">{{ problema.descricao }}</p>
+            <span
+              class="badge {% if problema.status == 'ABERTO' %}bg-danger{% elif problema.status == 'ANDAMENTO' %}bg-warning{% else %}bg-success{% endif %}"
+            >
+              {{ problema.get_status_display }}
+            </span>
+            {% if problema.oficina %}
+            <small class="text-muted ms-2"
+              >✓ Oficina interessada: {{ problema.oficina.username }}</small
+            >
+            {% else %}
+            <small class="text-muted ms-2">Aguardando oficina...</small>
+            {% endif %}
+          </div>
+          {% if problema.imagem %}
+          <div class="col-md-4">
+            <img
+              src="{{ problema.imagem.url }}"
+              alt="Imagem do problema"
+              class="img-fluid rounded"
+            />
+          </div>
+          {% endif %}
         </div>
+      </div>
     </div>
-    
-    <!-- Lista de Problemas -->
-    <div class="col-md-7">
-        <h3 class="mb-3">
-            <i class="fas fa-list"></i> Meus Chamados
-        </h3>
-        
-        {% if problemas %}
-            <div class="list-group">
-                {% for problema in problemas %}
-                    <div class="card mb-3 border-start border-4 {% if problema.status == 'CONCLUIDO' %}border-success{% elif problema.status == 'ANDAMENTO' %}border-info{% else %}border-warning{% endif %}">
-                        <div class="card-body">
-                            <div class="row">
-                                <!-- Imagem -->
-                                {% if problema.imagem %}
-                                    <div class="col-md-3 mb-2 mb-md-0">
-                                        <img src="{{ problema.imagem.url }}" alt="{{ problema.titulo }}" 
-                                             class="img-fluid rounded" style="max-height: 150px; object-fit: cover;">
-                                    </div>
-                                    <div class="col-md-9">
-                                {% else %}
-                                    <div class="col-md-12">
-                                {% endif %}
-                                
-                                        <!-- Informações -->
-                                        <h5 class="card-title">
-                                            <i class="fas fa-car"></i> {{ problema.modelo_carro }}
-                                        </h5>
-                                        <h6 class="card-subtitle mb-2 text-muted">{{ problema.titulo }}</h6>
-                                        
-                                        <p class="card-text">{{ problema.descricao|truncatewords:15 }}</p>
-                                        
-                                        <!-- Status e Metadados -->
-                                        <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-                                            <span class="badge {% if problema.status == 'ABERTO' %}bg-danger{% elif problema.status == 'ANDAMENTO' %}bg-info{% else %}bg-success{% endif %}">
-                                                <i class="fas fa-{% if problema.status == 'ABERTO' %}clock{% elif problema.status == 'ANDAMENTO' %}hourglass-half{% else %}check-circle{% endif %}"></i>
-                                                {{ problema.get_status_display }}
-                                            </span>
-                                            
-                                            {% if problema.oficina %}
-                                                <span class="badge bg-success">
-                                                    <i class="fas fa-check-circle"></i> 
-                                                    Oficina: {{ problema.oficina.first_name }} {{ problema.oficina.last_name }}
-                                                </span>
-                                            {% else %}
-                                                {% if problema.total_interessadas > 0 %}
-                                                    <span class="badge bg-warning text-dark">
-                                                        <i class="fas fa-handshake"></i> 
-                                                        {{ problema.total_interessadas }} oficina{{ problema.total_interessadas|pluralize }}
-                                                    </span>
-                                                {% else %}
-                                                    <span class="badge bg-secondary">
-                                                        <i class="fas fa-hourglass-end"></i> 
-                                                        Aguardando interesse
-                                                    </span>
-                                                {% endif %}
-                                            {% endif %}
-                                            
-                                            <small class="text-muted">
-                                                <i class="fas fa-calendar"></i> 
-                                                {{ problema.data_criacao|date:"d/m/Y H:i" }}
-                                            </small>
-                                        </div>
-                                        
-                                        <!-- Oficinas Interessadas -->
-                                        {% if problema.total_interessadas > 0 and not problema.oficina %}
-                                            <div class="mt-3 pt-3 border-top">
-                                                <small class="text-muted fw-bold">
-                                                    <i class="fas fa-list"></i> Oficinas Interessadas:
-                                                </small>
-                                                <div class="mt-2">
-                                                    {% for interesse in problema.interesses.all %}
-                                                        {% if interesse.status == 'INTERESSADA' %}
-                                                            <div class="alert alert-info alert-sm py-2 px-3 mb-2" role="alert">
-                                                                <div class="d-flex justify-content-between align-items-start">
-                                                                    <div>
-                                                                        <strong>
-                                                                            <i class="fas fa-wrench"></i> 
-                                                                            {{ interesse.oficina.first_name }} {{ interesse.oficina.last_name }}
-                                                                        </strong>
-                                                                        {% if interesse.oficina.perfil_oficina.nome_oficina %}
-                                                                            <br>
-                                                                            <small class="text-muted">
-                                                                                {{ interesse.oficina.perfil_oficina.nome_oficina }}
-                                                                            </small>
-                                                                        {% endif %}
-                                                                        {% if interesse.mensagem %}
-                                                                            <br>
-                                                                            <small class="text-muted d-block mt-1">
-                                                                                <i class="fas fa-quote-left"></i>
-                                                                                {{ interesse.mensagem|truncatewords:20 }}
-                                                                            </small>
-                                                                        {% endif %}
-                                                                    </div>
-                                                                    <div class="btn-group btn-group-sm" role="group">
-                                                                        <form method="post" action="{% url 'aceitar_interesse' interesse.id %}" style="display:inline;">
-                                                                            {% csrf_token %}
-                                                                            <button type="submit" class="btn btn-success btn-sm" title="Aceitar">
-                                                                                <i class="fas fa-check"></i>
-                                                                            </button>
-                                                                        </form>
-                                                                        <form method="post" action="{% url 'rejeitar_interesse' interesse.id %}" style="display:inline;">
-                                                                            {% csrf_token %}
-                                                                            <button type="submit" class="btn btn-danger btn-sm" title="Rejeitar">
-                                                                                <i class="fas fa-times"></i>
-                                                                            </button>
-                                                                        </form>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                </div>
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                {% if problema.imagem %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="alert alert-info" role="alert">
-                <i class="fas fa-info-circle"></i>
-                <strong>Nenhum problema registrado ainda.</strong>
-                <br>
-                Preencha o formulário ao lado para registrar um novo problema.
-            </div>
-        {% endif %}
-    </div>
+    {% empty %}
+    <p>Nenhum problema registrado.</p>
+    {% endfor %}
+  </div>
 </div>
-
-<style>
-    .card {
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
-    }
-    
-    .form-control, .form-select {
-        border-radius: 0.375rem;
-    }
-    
-    .form-control:focus, .form-select:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    }
-    
-    .input-group > .form-control {
-        border-right: 0;
-    }
-    
-    .input-group-text {
-        border-left: 0;
-        background-color: #f8f9fa;
-    }
-    
-    .alert-sm {
-        font-size: 0.875rem;
-        border-left: 4px solid currentColor;
-    }
-    
-    .btn-group-sm {
-        display: flex;
-        gap: 4px;
-    }
-</style>
 {% endblock %}

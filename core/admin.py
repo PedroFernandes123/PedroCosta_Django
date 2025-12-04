@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Especialidade, PerfilOficina, Problema, Interesse
+from .models import User, Especialidade, PerfilOficina, Problema
 
 # 1. Configuração do Usuário Personalizado
 # Usamos UserAdmin para manter a segurança de senhas e funcionalidades padrão
@@ -59,25 +59,3 @@ class ProblemaAdmin(admin.ModelAdmin):
             colors.get(obj.status, 'black'),
             obj.get_status_display()
         )
-
-# 5. Configuração dos Interesses (Oficinas interessadas)
-@admin.register(Interesse)
-class InteresseAdmin(admin.ModelAdmin):
-    # Colunas visíveis na tabela
-    list_display = ('get_oficina', 'get_problema', 'status', 'data_interesse')
-    # Filtros laterais
-    list_filter = ('status', 'data_interesse')
-    # Barra de pesquisa
-    search_fields = ('oficina__username', 'problema__titulo', 'problema__modelo_carro')
-    # Campos que aparecem ao editar
-    fields = ('problema', 'oficina', 'status', 'mensagem', 'data_interesse', 'data_atualizacao')
-    # Campos somente leitura
-    readonly_fields = ('data_interesse', 'data_atualizacao')
-
-    def get_oficina(self, obj):
-        return f"{obj.oficina.first_name} {obj.oficina.last_name}".strip() or obj.oficina.username
-    get_oficina.short_description = 'Oficina'
-
-    def get_problema(self, obj):
-        return f"{obj.problema.modelo_carro} - {obj.problema.titulo}"
-    get_problema.short_description = 'Problema'
