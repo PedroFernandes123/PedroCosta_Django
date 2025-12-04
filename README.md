@@ -1,4 +1,5 @@
 # ECAA09 Parte2
+
 Segunda parte do projeto Django para a disciplina ECAA09
 
 # Proposta da Atividade (deixar mais claro a avaliação)
@@ -9,7 +10,8 @@ Segunda parte do projeto Django para a disciplina ECAA09
 - No dashboard de oficina selecionar um problema cadastrado pelo cliente
 - No dashboard de oficina listar problemas selecionados
 
-## Resultados do Gemini 3 
+## Resultados do Gemini 3
+
 [Chat de Geração do Projeto no Gemini 3 Pro](https://gemini.google.com/share/689d84d7820e)
 
 ## Primeiro Uso
@@ -26,6 +28,7 @@ pip install -r requirements.txt
 ```
 
 Criar banco de dados com modelos:
+
 ```bash
 # Criar tabelas do core
 python manage.py makemigrations core
@@ -36,6 +39,7 @@ python manage.py createsuperuser
 ```
 
 Rodar servidor de debug:
+
 ```bash
 python manage.py runserver
 ```
