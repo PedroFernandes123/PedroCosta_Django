@@ -95,7 +95,7 @@ Depois de criado:
 ```
 1. Clicar em "Connections"
 2. Copiar "Internal Database URL"
-3. Exemplo: postgresql://postgres:xyz@dpg-abc.render.internal:5432/ecaa09
+3. Exemplo: postgresql://postgre:Gb0VlPrsTbaNFyHCM1pzzL0mCQ1zyTMB@dpg-d4oa0a2li9vc73fsljgg-a/pedrocosta03
 ```
 
 **⚠️ Guardar esta URL - será usada no passo 5**
